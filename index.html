@@ -3,11 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home Page</title>
+    <title>Excel Data Cards</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        #cardContainer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+        }
+
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 300px;
+            margin: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .card img {
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+
+        #pagination {
+		margin:6px solid red;
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        #pagination button {
+            border: none;
+            padding: 10px 15px;
+            margin: 0 5px;
+            cursor: pointer;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        #pagination button:hover {
+            background-color: #0056b3;
+        }
+
+        #pagination button.active {
+            background-color: #bae1c3;
+        }
+    </style>
 </head>
 <body>
-    <h1>Welcome to the Home Page</h1>
-    <p>This is the main page of your website.</p>
-    <a href="page2.html">Go to Page 2</a>
+    <div id="cardContainer"></div>
+    <div id="pagination"></div>
+    <script>
+
+        let currentPage = 1;
+        const cardsPerPage = 4;
+        let data = [];
+
+
+        function renderCards(data) {
+            const cardContainer = document.getElementById('cardContainer');
+            cardContainer.innerHTML = '';
+            let start = (currentPage - 1) * cardsPerPage;
+            let end = start + cardsPerPage;
+
+            let currentPageData = data.slice(start, end);
+
+            currentPageData.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <h3>${item['name']}</h3>
+                    <p><strong>Weight:</strong> ${item['wt']}</p>
+                    <p><strong>Description:</strong> ${item['desc']}</p>
+                    <p><strong>MRP:</strong> ${item['MRP']}</p>
+                    <p><strong>Our Price:</strong> ${item['our price']}</p>
+                `;
+                cardContainer.appendChild(card);
+            });
+        }
+
+        function renderPagination(data) {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+            const totalPages = Math.ceil(data.length / cardsPerPage);
+            for (let i = 1; i <= totalPages; i++) {
+                const button = document.createElement('button');
+                button.textContent = i;
+                if (i === currentPage) {
+                    button.classList.add('active');
+                }
+                button.addEventListener('click', () => {
+                    currentPage = i;
+                    renderCards(data);
+                    renderPagination(data);
+                });
+                pagination.appendChild(button);
+            }
+        }
+		// Check if data exists in local storage on page load
+        window.onload = function() {
+            const savedData = localStorage.getItem('excelData');
+            if (savedData) {
+                data = JSON.parse(savedData);
+                //document.getElementById('fileInput').style.display = 'none'; // Hide the upload button if data exists
+                renderCards(data);
+                renderPagination(data);
+            }
+        };
+		
+    </script>
 </body>
 </html>
